@@ -93,8 +93,6 @@ Msg::message()
 {
     debug("Msg::message()");
 
-    stringstream ss;
-
     string line;
     string command;
 
@@ -104,51 +102,48 @@ Msg::message()
     {
         line += "\n";
         
-        ss.str("");
-        ss << line;
-
-        if(ss.str().length() > 0)
-            ss >> command;
+        istringstream iss(line);
+        debug("Msg::message()::iss.str():" + iss.str());
 
         bool commandFound = false;
-
-        debug("Msg::message()::ss.str():" + ss.str());
+        getline(iss, command, ' ');
         debug("Msg::message()::command:" + command);
 
         if(command.length() > 0)
         {
             if(command == "send")
             {
-                debug("Msg::message()::send:: command: " + command);
-                msg_send(line);
                 commandFound = true;
+                debug("Msg::message()::send");
+                msg_send(line);
+                
             }
 
             if(command == "list")
             {
-                debug("Msg::message()::list:: command: " + command);
-                msg_list(line);
                 commandFound = true;
+                debug("Msg::message()::list");
+                msg_list(line);
             }    
 
             if(command == "read")
             {
-                debug("Msg::message()::read:: command: " + command);
-                msg_read(line);
                 commandFound = true;
+                debug("Msg::message()::read");
+                msg_read(line);
             }
 
             if(command == "reset")
             {
-                debug("Msg::message()::reset:: command: " + command);
-                msg_reset();
                 commandFound = true;
+                debug("Msg::message()::reset");
+                msg_reset();
             }
 
             if(command == "quit")
             {
-                debug("Msg::message()::quit:: command: " + command);
                 commandFound = true;
+                debug("Msg::message()::quit");
                 exit(0);
 
             }
@@ -165,9 +160,6 @@ Msg::message()
 void
 Msg::msg_send(string line)
 {
-    stringstream ss;
-    ss << line;
-
     string command;
     string user;
     string subject;
@@ -176,18 +168,23 @@ Msg::msg_send(string line)
     string message;
 
     stringstream protocol;
+    stringstream ss;
+
+    //push the parameter argument into the stringstream
+    ss << line;
 
     int exitState = 0;
-
-    debug("Msg::msg_send()::inputLine: " + line);
 
     getline(ss, command, ' ');
     getline(ss, user, ' ');
     getline(ss, subject, '\n');
 
-    debug("Msg::msg_send():: command: " + command);
-    debug("Msg::msg_send():: user: " + user);
-    debug("Msg::msg_send():: subject: " + subject);
+
+    debug("Msg::msg_send()::inputLine:" + line);
+    debug("Msg::msg_send()::command:" + command);
+    debug("Msg::msg_send()::user:" + user);
+    debug("Msg::msg_send()::subject:" + subject);
+
 
     cout << "- Type your message. End with a blank line -" << endl;
 
@@ -202,13 +199,13 @@ Msg::msg_send(string line)
         else
         {
             message.append(lineTest + "\n");
-            debug("Msg::msg_send(): lineTest: " + lineTest);
+            debug("Msg::msg_send():lineTest:" + lineTest);
         }   
     }
 
     protocol << "put " << user << " " << subject << " " << message.length() << "\n" << message;
 
-    debug("Msg::msg_send(): send_request(): protocol: " + protocol.str());
+    debug("Msg::msg_send():send_request():protocol:" + protocol.str());
     bool success = send_request(protocol.str());
 
     if (not success)
@@ -223,7 +220,7 @@ Msg::msg_send(string line)
 void
 Msg::msg_list(string line)
 {
-    debug("Msg::msg_list()::line: " + line);
+    debug("Msg::msg_list()::line:" + line);
 
     stringstream ss;
     ss << line;
@@ -234,13 +231,13 @@ Msg::msg_list(string line)
     ss >> command;
     ss >> user;
 
-    debug("Msg::msg_list():: command: " + command);
-    debug("Msg::msg_list():: user: " + user);
+    debug("Msg::msg_list()::command:" + command);
+    debug("Msg::msg_list()::user:" + user);
 
     stringstream protocol;
     protocol << "list " << user << "\n";
 
-    debug("Msg::msg_list():: send_request():: protocol: " + protocol.str());
+    debug("Msg::msg_list()::send_request()::protocol:" + protocol.str());
     bool success = send_request(protocol.str());
     
 
@@ -269,14 +266,14 @@ Msg::msg_read(string line)
     ss >> user;
     ss >> index;
 
-    debug("Msg::msg_read():: command: " + command);
-    debug("Msg::msg_read():: user: " + user);
-    debug("Msg::msg_read():: index: " + index);
+    debug("Msg::msg_read()::command:" + command);
+    debug("Msg::msg_read()::user:" + user);
+    debug("Msg::msg_read()::index:" + index);
 
     stringstream protocol;
     protocol << "get " << user << " " << index << "\n";
 
-    debug("Msg::msg_read():: send_request():: protocol: " + protocol.str());
+    debug("Msg::msg_read()::send_request()::protocol:" + protocol.str());
     bool success = send_request(protocol.str());
     
 
