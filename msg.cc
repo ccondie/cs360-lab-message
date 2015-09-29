@@ -2,6 +2,7 @@
 
 Msg::Msg(string host, int port, bool debug_t) 
 {
+    debug("Msg::constructor");
     // setup variables
     host_ = host;
     port_ = port;
@@ -59,6 +60,7 @@ Msg::create()
 void
 Msg::close_socket() 
 {
+    debug("Msg::close_socket()");
     close(server_);
 }
 
@@ -96,17 +98,15 @@ Msg::message()
     string line;
     string command;
 
-    while(1)
+    cout << "% ";
+
+    while(getline(cin, line))
     {
-        cout << "% ";
-
-        line = "";
-        ss.str("");
-
-        getline(cin, line);
         line += "\n";
-
+        
+        ss.str("");
         ss << line;
+
         if(ss.str().length() > 0)
             ss >> command;
 
@@ -156,6 +156,8 @@ Msg::message()
             if(!commandFound)
                 cout << "Command not found: " << command << endl;
         }
+
+        cout << "% ";
     }
     close_socket();
 }
