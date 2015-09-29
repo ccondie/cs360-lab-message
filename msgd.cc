@@ -102,14 +102,13 @@ Msgd::handle(int client)
     // loop to handle all requests
     while (1) 
     {
-        debug("Msgd::handle(): -handleloop");
+        debug("Msgd::handle():while(1)");
         // get a request
         string request = get_request(client);
+
         // break if client is done or an error occurred
         if (request.empty())
             break;
-
-
 
         //parse request
         message = parse(request, client);
@@ -367,10 +366,19 @@ Msgd::get_request(int client)
     debug("Msgd::get_request()");
 
     string request = "";
+    bool newlineFound = false;
+
     // read until we get a newline
-    while (request.find("\n") == string::npos) 
-    {
+    // while (request.find("\n") == string::npos) 
+    while (!newlineFound) 
+    {   
+
+        debug("\tMsgd::get_request()::while");
+
+        //read from the connection
         int nread = recv(client,buf_,1024,0);
+
+        //check for an recv error
         if (nread < 0) 
         {
             if (errno == EINTR)
@@ -379,13 +387,49 @@ Msgd::get_request(int client)
             else
                 // an error occurred, so break out
                 return "";
-        } else if (nread == 0) 
+        } 
+        else if (nread == 0) 
         {
             // the socket is closed
             return "";
         }
-        // be sure to use append in case we have binary data
-        request.append(buf_,nread);
+
+        string grab_recv = "";
+        grab_recv.append(buf_, nread);
+        debug("Msgd::get_request()::appended from buf_:" + grab_recv);
+
+        if(grab_recv.find("\n") != string::npos)
+        {
+            debug("Msgd::get_request()::found newline");
+
+            string preLine;
+            stringstream postLine;
+
+            //isolate what came before the newline
+            istringstream iss(grab_recv);
+            getline(iss, preLine, '\n');
+
+            debug("Msgd::get_request()::preLine:" + preLine);
+
+            while(!iss.eof())
+            {
+               string dummy;
+               iss >> dummy;
+               postLine << dummy;
+            }
+
+            debug("Msgd::get_request()::postLine:" + postLine.str());
+
+            //newline found in the last grab from the recv function
+            newlineFound = true;
+        }
+        else
+        {
+            //a newline was NOT found
+
+            // be sure to use append in case we have binary data
+            request.append(grab_recv);
+        }
     }
     // a better server would cut off anything after the newline and
     // save it in a cache
