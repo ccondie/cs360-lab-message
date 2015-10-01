@@ -100,14 +100,14 @@ Msg::message()
 
     while(getline(cin, line))
     {
-        line += "\n";
-        
         istringstream iss(line);
         debug("Msg::message()::iss.str():" + iss.str());
 
         bool commandFound = false;
         getline(iss, command, ' ');
-        debug("Msg::message()::command:" + command);
+        debug("Msg::message()::command:" + command + "|END");
+
+        line += "\n";
 
         if(command.length() > 0)
         {

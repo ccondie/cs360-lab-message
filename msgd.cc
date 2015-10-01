@@ -402,23 +402,24 @@ Msgd::get_request(int client)
         {
             debug("Msgd::get_request()::found newline");
 
-            string preLine;
-            stringstream postLine;
+            string preline;
+            string postline;
 
             //isolate what came before the newline
             istringstream iss(grab_recv);
-            getline(iss, preLine, '\n');
+            getline(iss, preline, '\n');
 
-            debug("Msgd::get_request()::preLine:" + preLine);
+            debug("Msgd::get_request()::preline:" + preline);
 
             while(!iss.eof())
             {
-               string dummy;
-               iss >> dummy;
-               postLine << dummy;
+                string dummy;
+                getline(iss, dummy, '\n');
+
+                postline.append(dummy + '\n');
             }
 
-            debug("Msgd::get_request()::postLine:" + postLine.str());
+            debug("Msgd::get_request()::postline:BEGIN|" + postline + "|END");
 
             //newline found in the last grab from the recv function
             newlineFound = true;
